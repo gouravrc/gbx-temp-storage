@@ -1,0 +1,32 @@
+name: Cleanup old CSVs
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Remove expired CSVs
+        run: |
+          NOW=$(date +%s)
+          for f in temp-csv/*.csv; do
+            TS=$(basename "$f" | grep -oE '^[0-9]{10}')
+            AGE=$((NOW - TS))
+            if [ "$AGE" -gt 1800 ]; then
+              rm "$f"
+            fi
+          done
+
+      - name: Commit deletions
+        run: |
+          git config user.name "cleanup-bot"
+          git config user.email "bot@github.com"
+          git add temp-csv/
+          git commit -m "Auto-delete expired CSVs" || echo "Nothing to delete"
+          git push
