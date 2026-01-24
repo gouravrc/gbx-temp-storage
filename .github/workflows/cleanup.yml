@@ -2,7 +2,7 @@ name: Cleanup old CSVs
 
 on:
   schedule:
-    - cron: "*/30 * * * *"
+    - cron: "*/59 * * * 6"
   workflow_dispatch:
 
 permissions:
